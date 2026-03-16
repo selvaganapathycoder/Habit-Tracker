@@ -1,4 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { 
+  Activity, BookOpen, Flame, Droplets, Moon, 
+  PenTool, Code2, GraduationCap, Footprints, 
+  Salad, Flower2, Music, Palette, 
+  Sparkles, Target, Star, Trash2, Plus, Check, ChevronRight
+} from 'lucide-react';
 
 const STORAGE_KEY = 'habits-tracker-data';
 
@@ -87,22 +93,21 @@ function calculateBestStreak(habitId, completions) {
 }
 
 const HABIT_ICONS = [
-  { id: 'exercise', icon: '🏃', label: 'Exercise' },
-  { id: 'read', icon: '📚', label: 'Read' },
-  { id: 'meditate', icon: '🧘', label: 'Meditate' },
-  { id: 'water', icon: '💧', label: 'Drink Water' },
-  { id: 'sleep', icon: '😴', label: 'Sleep Early' },
-  { id: 'journal', icon: '✍️', label: 'Journal' },
-  { id: 'code', icon: '💻', label: 'Code' },
-  { id: 'learn', icon: '🎓', label: 'Learn' },
-  { id: 'walk', icon: '🚶', label: 'Walk' },
-  { id: 'healthy', icon: '🥗', label: 'Eat Healthy' },
-  { id: 'stretch', icon: '🤸', label: 'Stretch' },
-  { id: 'music', icon: '🎵', label: 'Practice Music' },
-  { id: 'art', icon: '🎨', label: 'Create Art' },
-  { id: 'clean', icon: '🧹', label: 'Clean' },
-  { id: 'focus', icon: '🎯', label: 'Deep Focus' },
-  { id: 'other', icon: '⭐', label: 'Other' },
+  { id: 'exercise', icon: Activity, color: '#ec4899', label: 'Exercise' },
+  { id: 'read', icon: BookOpen, color: '#3b82f6', label: 'Read' },
+  { id: 'meditate', icon: Flower2, color: '#8b5cf6', label: 'Meditate' },
+  { id: 'water', icon: Droplets, color: '#0ea5e9', label: 'Drink Water' },
+  { id: 'sleep', icon: Moon, color: '#6366f1', label: 'Sleep Early' },
+  { id: 'journal', icon: PenTool, color: '#10b981', label: 'Journal' },
+  { id: 'code', icon: Code2, color: '#f59e0b', label: 'Code' },
+  { id: 'learn', icon: GraduationCap, color: '#f43f5e', label: 'Learn' },
+  { id: 'walk', icon: Footprints, color: '#14b8a6', label: 'Walk' },
+  { id: 'healthy', icon: Salad, color: '#22c55e', label: 'Eat Healthy' },
+  { id: 'music', icon: Music, color: '#d946ef', label: 'Music' },
+  { id: 'art', icon: Palette, color: '#eab308', label: 'Create Art' },
+  { id: 'clean', icon: Sparkles, color: '#06b6d4', label: 'Clean' },
+  { id: 'focus', icon: Target, color: '#ef4444', label: 'Deep Focus' },
+  { id: 'other', icon: Star, color: '#a855f7', label: 'Other' },
 ];
 
 function HeatmapCalendar({ habits, completions }) {
@@ -111,7 +116,7 @@ function HeatmapCalendar({ habits, completions }) {
     const daysArray = [];
 
     // Go back ~11 weeks + remaining days to fill current week
-    const totalDays = 77; // 11 weeks = 77 days
+    const totalDays = 77;
 
     for (let i = totalDays - 1; i >= 0; i--) {
       const date = new Date(today);
@@ -143,11 +148,9 @@ function HeatmapCalendar({ habits, completions }) {
       });
     }
 
-    // Group into weeks (columns)
     const weeksArray = [];
     let currentWeek = [];
 
-    // Add empty cells for alignment at start
     const firstDayOfWeek = daysArray[0].dayOfWeek;
     for (let i = 0; i < firstDayOfWeek; i++) {
       currentWeek.push(null);
@@ -205,6 +208,11 @@ export default function App() {
   const [isAdding, setIsAdding] = useState(false);
   const [selectedIcon, setSelectedIcon] = useState(null);
   const [customName, setCustomName] = useState('');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const today = getToday();
   const todayCompletions = data.completions[today] || [];
@@ -261,7 +269,8 @@ export default function App() {
     const newHabit = {
       id: generateId(),
       name,
-      icon: selectedIcon.icon,
+      iconId: selectedIcon.id,
+      color: selectedIcon.color,
       createdAt: new Date().toISOString(),
     };
 
@@ -288,91 +297,108 @@ export default function App() {
 
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
+      weekday: 'short',
+      month: 'short',
       day: 'numeric',
     });
   };
 
+  if (!mounted) return null;
+
   return (
     <div className="app">
+      <div className="ambient-glow glow-1"></div>
+      <div className="ambient-glow glow-2"></div>
+      
       <header className="header">
-        <h1 className="title">Habits</h1>
-        <p className="subtitle">{formatDate(today)}</p>
+        <div className="headerTop">
+          <div className="dateChip">
+            {formatDate(today)}
+          </div>
+        </div>
+        <h1 className="title">Daily Overview</h1>
+        <p className="subtitle">Stay consistent, build momentum.</p>
       </header>
 
       <main className="main">
-        <div className="card statsCard">
+        <div className="card statsCard glass">
           <div className="statGrid">
             <div className="stat primary">
               <span className="statValue streakValue">
-                <span className="fireIcon">🔥</span>
+                <Flame className="fireIcon" />
                 {stats.avgStreak}
               </span>
-              <span className="statLabel">Day Streak</span>
+              <span className="statLabel">Avg Day Streak</span>
             </div>
-            <div className="stat">
-              <span className="statValue">{stats.completedToday}/{stats.totalHabits}</span>
-              <span className="statLabel">Today</span>
-            </div>
-            <div className="stat">
-              <span className="statValue">{stats.completionRate}%</span>
-              <span className="statLabel">Complete</span>
-            </div>
-            <div className="stat">
-              <span className="statValue">{stats.bestStreak}</span>
-              <span className="statLabel">Best</span>
+            <div className="statGroup">
+              <div className="stat">
+                <span className="statValue">{stats.completedToday}/{stats.totalHabits}</span>
+                <span className="statLabel">Today</span>
+              </div>
+              <div className="stat">
+                <span className="statValue highlight">{stats.completionRate}%</span>
+                <span className="statLabel">Complete</span>
+              </div>
+              <div className="stat">
+                <span className="statValue highlight-2">{stats.bestStreak}</span>
+                <span className="statLabel">Best Streak</span>
+              </div>
             </div>
           </div>
 
-          {stats.totalHabits > 0 && (
-            <div className="progressContainer">
-              <div className="progressBar">
-                <div
-                  className="progressFill"
-                  style={{ width: `${stats.completionRate}%` }}
-                />
-              </div>
+          <div className="progressContainer">
+            <div className="progressBar">
+              <div
+                className="progressFill"
+                style={{ width: `${stats.completionRate}%` }}
+              />
             </div>
-          )}
+          </div>
         </div>
 
         {data.habits.length > 0 && (
-          <div className="card heatmapCard">
-            <h2 className="cardTitle">Activity</h2>
+          <div className="card heatmapCard glass">
+            <div className="cardHeader">
+              <h2 className="cardTitle">Consistency Heatmap</h2>
+            </div>
             <HeatmapCalendar habits={data.habits} completions={data.completions} />
           </div>
         )}
 
-        <div className="card listCard">
+        <div className="card listCard glass">
           <div className="cardHeader">
-            <h2 className="cardTitle">Daily Habits</h2>
+            <h2 className="cardTitle">Your Habits</h2>
             {!isAdding && (
-              <button className="btn primary" onClick={() => setIsAdding(true)}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
-                Add
+              <button className="btn primaryLight" onClick={() => setIsAdding(true)}>
+                <Plus size={16} />
+                <span>New Habit</span>
               </button>
             )}
           </div>
 
           {isAdding && (
-            <form className="form" onSubmit={addHabit}>
+            <form className="form glass-form" onSubmit={addHabit}>
               <div className="formSection">
-                <label className="label">Choose Habit</label>
+                <label className="label">Choose a Habit</label>
                 <div className="iconGrid">
-                  {HABIT_ICONS.map((item) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      className={`iconChip ${selectedIcon?.id === item.id ? 'selected' : ''}`}
-                      onClick={() => setSelectedIcon(item)}
-                    >
-                      <span className="iconEmoji">{item.icon}</span>
-                      <span className="iconLabel">{item.label}</span>
-                    </button>
-                  ))}
+                  {HABIT_ICONS.map((item) => {
+                    const isSelected = selectedIcon?.id === item.id;
+                    const IconComp = item.icon;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        className={`iconChip ${isSelected ? 'selected' : ''}`}
+                        style={{ '--icon-color': item.color }}
+                        onClick={() => setSelectedIcon(item)}
+                      >
+                        <div className="iconEmojiContainer" style={{ color: isSelected ? '#fff' : item.color }}>
+                           <IconComp size={24} />
+                        </div>
+                        <span className="iconLabel">{item.label}</span>
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
 
@@ -381,8 +407,8 @@ export default function App() {
                   <label className="label">Habit Name</label>
                   <input
                     type="text"
-                    className="input"
-                    placeholder="Enter habit name..."
+                    className="input base-input"
+                    placeholder="E.g. Call family, Code for 1 hour..."
                     value={customName}
                     onChange={(e) => setCustomName(e.target.value)}
                     autoFocus
@@ -390,14 +416,14 @@ export default function App() {
                 </div>
               )}
 
-              <div className="formActions">
+              <div className="formActions mt-6">
                 <button type="button" className="btn ghost" onClick={resetForm}>Cancel</button>
                 <button
                   type="submit"
                   className="btn primaryLight"
                   disabled={!selectedIcon || (selectedIcon.id === 'other' && !customName.trim())}
                 >
-                  Add Habit
+                  Create Habit <ChevronRight size={16} />
                 </button>
               </div>
             </form>
@@ -405,47 +431,55 @@ export default function App() {
 
           {data.habits.length === 0 && !isAdding ? (
             <div className="empty">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-              </svg>
+              <div className="emptyIconWrapper">
+                <Sparkles size={32} />
+              </div>
               <p>No habits yet</p>
-              <span>Add your first habit to start tracking</span>
+              <span>Build extraordinary routines starting today.</span>
+              <button className="btn outline mt-4" onClick={() => setIsAdding(true)}>
+                Create First Habit
+              </button>
             </div>
           ) : (
             <ul className="habitList">
               {data.habits.map((habit) => {
                 const isCompleted = todayCompletions.includes(habit.id);
                 const streak = calculateStreak(habit.id, data.completions);
+                const iconData = HABIT_ICONS.find(h => h.id === habit.iconId) || HABIT_ICONS[0];
+                const IconComp = iconData.icon;
+                
                 return (
                   <li key={habit.id} className={`habitItem ${isCompleted ? 'completed' : ''}`}>
                     <button
                       className={`checkBtn ${isCompleted ? 'checked' : ''}`}
+                      style={{ '--check-color': habit.color }}
                       onClick={() => toggleHabit(habit.id)}
                       aria-label={isCompleted ? 'Mark as incomplete' : 'Mark as complete'}
                     >
-                      {isCompleted && (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                          <path d="M20 6L9 17l-5-5" />
-                        </svg>
-                      )}
+                      {isCompleted && <Check size={18} strokeWidth={3} />}
                     </button>
-                    <span className="habitIcon">{habit.icon}</span>
+                    
+                    <div className="habitIconWrapper" style={{ backgroundColor: `${habit.color}15`, color: habit.color }}>
+                      <IconComp size={20} />
+                    </div>
+                    
                     <div className="habitInfo">
                       <span className="habitName">{habit.name}</span>
                       {streak > 0 && (
-                        <span className="habitStreak">
-                          🔥 {streak} day{streak !== 1 ? 's' : ''}
-                        </span>
+                        <div className="habitStreakWrapper">
+                          <span className="habitStreak">
+                            🔥 {streak} Day Streak
+                          </span>
+                        </div>
                       )}
                     </div>
+                    
                     <button
                       className="iconBtn danger"
                       onClick={() => deleteHabit(habit.id)}
                       aria-label="Delete habit"
                     >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
-                      </svg>
+                       <Trash2 size={18} />
                     </button>
                   </li>
                 );
@@ -455,9 +489,9 @@ export default function App() {
         </div>
 
       </main>
-
+      
       <footer className="credit">
-        <span>Coded by <a href="https://github.com/selvaganapathycoder" target="_blank" rel="noopener noreferrer">Selvaganapathy</a></span>
+        <span>Designed by <a href="https://github.com/selvaganapathycoder" target="_blank" rel="noopener noreferrer">Selvaganapathy</a></span>
       </footer>
     </div>
   );
